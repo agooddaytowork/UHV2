@@ -9,10 +9,9 @@ class SerialInterface: public QObject
 {
     Q_OBJECT
         QString &mPortName;
-        QSerialPort mSerialPort;
         quint8 mReadBufferSize;
-        int mTimeOut4Buffer;
-        bool mIsConnected;
+        uint  mTimeOut4Buffer;
+        bool mIsConnected = false;
         QList<QByteArray> commandList;
 
 

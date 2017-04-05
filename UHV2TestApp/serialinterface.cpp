@@ -7,50 +7,26 @@
 
 
 SerialInterface::SerialInterface(const QString &PortName):
-    mPortName(* new QString (PortName)),
-    mSerialPort( new QSerialPort(PortName, NULL)),
-    mReadBufferSize(256),
-    mTimeOut4Buffer(300),
-    mIsConnected(false)
+    mPortName(* new QString (PortName))
 {
-
-        mSerialPort.setReadBufferSize(mReadBufferSize); //NEED Discussed
-        mSerialPort.setDataBits(QSerialPort::Data8);
-        mSerialPort.setBaudRate(QSerialPort::Baud9600);
-        mSerialPort.setStopBits(QSerialPort::OneStop);
-        mSerialPort.setParity(QSerialPort::NoParity);   //NEED CHECK pg98
-        mSerialPort.setFlowControl(QSerialPort::NoFlowControl);
-
-        connect(&mSerialPort, SIGNAL(readyRead()),this,SLOT(readNow()));
+    mIsConnected = false;
+    mTimeOut4Buffer = 300;
+    mReadBufferSize = 256;
         connect(this,&SerialInterface::startTrasmission,this,&SerialInterface::doTransmission);
-        ReconfigSerialPort(PortName);
+        //ReconfigSerialPort(PortName);
 }
 
 SerialInterface::~SerialInterface()
 {
 
-    mSerialPort.close();
 
 }
 
 void SerialInterface::ReconfigSerialPort(const QString &PortName)
 {
-           mSerialPort.close();
-           mSerialPort.setPortName(PortName);
+
            mPortName = PortName;
-           //Validity of Connection Should Add Here
-           if (mSerialPort.open(QIODevice::ReadWrite))
-           {
-               mIsConnected = true;
-               emit isConnected();
-           }
-
-           else
-           {
-               mIsConnected = false;
-               emit isNotConnected();
-           }
-
+            doTransmission();
 }
 
 void SerialInterface::writeNow(const QByteArray &dataToWrite)
@@ -61,25 +37,46 @@ void SerialInterface::writeNow(const QByteArray &dataToWrite)
 
 void SerialInterface::readNow()
 {
-    QByteArray data;
 
-//    data = mSerialPort.readAll();
-    while(mSerialPort.waitForReadyRead(mTimeOut4Buffer))
-    {
-        data += mSerialPort.readAll();
-    }
-    qDebug()<<"emit sigReadready from readNow" << endl;
-    emit sigReadready(data);
 }
 
 void SerialInterface::doTransmission()
 {
+    static QSerialPort  mSerialPort;
+
+    if( QString::compare(mSerialPort.portName(), mPortName, Qt::CaseSensitive) != 0)
+    {
+        mSerialPort.close();
+
+        mSerialPort.setReadBufferSize(mReadBufferSize); //NEED Discussed
+        mSerialPort.setDataBits(QSerialPort::Data8);
+        mSerialPort.setBaudRate(QSerialPort::Baud9600);
+        mSerialPort.setStopBits(QSerialPort::OneStop);
+        mSerialPort.setParity(QSerialPort::NoParity);   //NEED CHECK pg98
+        mSerialPort.setFlowControl(QSerialPort::NoFlowControl);
+
+
+        mSerialPort.setPortName(mPortName);
+        //Validity of Connection Should Add Here
+        if (mSerialPort.open(QIODevice::ReadWrite))
+        {
+            mIsConnected = true;
+            emit isConnected();
+        }
+
+        else
+        {
+            mIsConnected = false;
+            emit isNotConnected();
+            return;
+        }
+    }
+
     QMutex  mutex;
     QByteArray data;
 
     if(mIsConnected)
     {
-//        disconnect(&mSerialPort, SIGNAL(readyRead()),this,SLOT(readNow()));
         mutex.lock();
         while(commandList.size() != 0)
         {
@@ -106,7 +103,6 @@ void SerialInterface::doTransmission()
 
         }
         mutex.unlock();
-//        connect(&mSerialPort, SIGNAL(readyRead()),this,SLOT(readNow()));
     }
 
 }

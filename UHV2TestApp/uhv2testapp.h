@@ -50,6 +50,8 @@ private slots:
 
     void on_pushButtonQuit_clicked();
 
+    void on_pushButton_SerialConnect_clicked();
+
 signals:
     void quitSerialThread();
     void sigWriteToSerialInterface(const QByteArray &data);
@@ -60,7 +62,6 @@ private:
     BinaryProtocol *currentPump;
     void listSerialPortsToComboBox();
     QThread SerialInterfaceThread;
-    SerialInterface *NowSI;
 
 
 };

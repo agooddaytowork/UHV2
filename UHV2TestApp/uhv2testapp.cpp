@@ -5,13 +5,13 @@
 UHV2TestApp::UHV2TestApp(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::UHV2TestApp),
-    currentPump(new BinaryProtocol(0)),
-    NowSI(new SerialInterface(""))
+    currentPump(new BinaryProtocol(0))
 {
     ui->setupUi(this);
     listSerialPortsToComboBox();
 
 
+    SerialInterface *NowSI = new SerialInterface("");
 
     NowSI->moveToThread(&SerialInterfaceThread);
     QObject::connect(NowSI,SIGNAL(sigReadready(QByteArray)),this,SLOT(slotReceiveDataFromSerialInterface(QByteArray)));
@@ -124,7 +124,6 @@ void UHV2TestApp::serialInterfaceIsConnected()
 {
     ui->pushButton_SerialConnect->setText("Connected");
     ui->pushButton_SerialConnect->setDisabled(true);
-
 
 }
 
@@ -272,4 +271,9 @@ void UHV2TestApp::on_pushButtonACK_clicked()
 void UHV2TestApp::on_pushButtonQuit_clicked()
 {
     this->close();
+}
+
+void UHV2TestApp::on_pushButton_SerialConnect_clicked()
+{
+
 }
