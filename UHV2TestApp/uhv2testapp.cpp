@@ -2,6 +2,7 @@
 #include "ui_uhv2testapp.h"
 #include  <QTimer>
 
+#define TIMER_VALUE 5000
 UHV2TestApp::UHV2TestApp(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::UHV2TestApp),
@@ -149,16 +150,16 @@ void UHV2TestApp::on_pushButton_clicked()
 
 void UHV2TestApp::on_pushButton_CH1_HV_clicked(bool checked)
 {
-//    static QTimer tmpTimer;
+    static QTimer tmpTimer;
     BinaryProtocol &tmp = BinaryProtocol::BP(0);
     if(checked)
     {
         emit sigWriteToSerialInterface(tmp.Ch1().HVSwitch().On().GenMsg());
         qDebug()  << checked;
         ui->pushButton_CH1_HV->setText("HV OFF");
-//        QObject::connect(&tmpTimer,&QTimer::timeout,this,&UHV2TestApp::slotCollectDataOnCH1);
+        QObject::connect(&tmpTimer,&QTimer::timeout,this,&UHV2TestApp::slotCollectDataOnCH1);
 
-//        tmpTimer.start(10000);
+        tmpTimer.start(TIMER_VALUE);
 
     }
     else
@@ -206,7 +207,7 @@ void UHV2TestApp::on_pushButton_CH2_HV_clicked(bool checked)
         ui->pushButton_CH1_HV->setText("HV OFF");
         QObject::connect(&tmpTimer,&QTimer::timeout,this,&UHV2TestApp::slotCollectDataOnCH2);
 
-        tmpTimer.start(30000);
+        tmpTimer.start(TIMER_VALUE);
     }
     else
     {
@@ -239,8 +240,8 @@ void UHV2TestApp::slotCollectDataOnCH1()
     BinaryProtocol &tmp = BinaryProtocol::BP(0);
 
     emit sigWriteToSerialInterface(tmp.Ch1().ReadP().GenMsg());
-    //emit sigWriteToSerialInterface(tmp.Ch1().ReadV().GenMsg());
-    //emit sigWriteToSerialInterface(tmp.Ch1().ReadI().GenMsg());
+    emit sigWriteToSerialInterface(tmp.Ch1().ReadV().GenMsg());
+    emit sigWriteToSerialInterface(tmp.Ch1().ReadI().GenMsg());
 }
 
 
@@ -249,8 +250,8 @@ void UHV2TestApp::slotCollectDataOnCH2()
     BinaryProtocol &tmp = BinaryProtocol::BP(0);
 
     emit sigWriteToSerialInterface(tmp.Ch2().ReadP().GenMsg());
-    //emit sigWriteToSerialInterface(tmp.Ch2().ReadV().GenMsg());
-   // emit sigWriteToSerialInterface(tmp.Ch2().ReadI().GenMsg());
+    emit sigWriteToSerialInterface(tmp.Ch2().ReadV().GenMsg());
+    emit sigWriteToSerialInterface(tmp.Ch2().ReadI().GenMsg());
 }
 
 void UHV2TestApp::on_pushButton_CH1_HV_clicked()

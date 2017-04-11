@@ -260,7 +260,9 @@ const QByteArray BinaryProtocol::GenMsg()
     mMsg.clear();
     mHdr=mHdrCmd;
     quint8 int8tmp = _SzCmd + _SzCh + mData.size();
-    if (int8tmp != 4)
+    if (int8tmp == 4)
+        mDataLen = _StdDatLen;
+    else
         mDataLen = IntStr2QBArr0Pad(int8tmp, _SzDatLen).toHex().toInt(NULL,16);
     mMsg<<mHdr<<mDataLen<<mCmd<<mCh<<mData;
     mChkSum=XORofAllBytesInQByteArr(mMsg)&_MskChkSum;
